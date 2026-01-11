@@ -125,6 +125,26 @@
   }
 }
 
+/* Drawer bounce animation */
+@keyframes drawer-up {
+  0% {
+    transform: translateY(100%);
+  }
+  60% {
+    transform: translateY(-3%);
+  }
+  80% {
+    transform: translateY(1%);
+  }
+  100% {
+    transform: translateY(0%);
+  }
+}
+
+.animate-drawer-up {
+  animation: drawer-up 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;

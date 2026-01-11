@@ -113,7 +113,7 @@ export default function Header() {
           preset='fade'
           per='char'
           className='text-lg'
-          delay={1.1}
+          delay={1.2}
         >
           AI Developer
         </TextEffect>

@@ -1,0 +1,76 @@
+export const metadata = {
+  slug: 'deep-agents-langchain',
+  title: 'Deep Agents with LangChain',
+  description: 'Unlimited power through file middleware',
+  imageAlt: 'Control room',
+  category: 'writing',
+  date: '2025-01-11',
+  videoSrc: '/control-panel-vid.mp4',
+};
+
+# Deep Agents with LangChain
+
+What I Found When Playing Around
+
+<Small>2025-01-11</Small>
+
+---
+
+The file write middleware is the most powerful tool I've discovered in the LangChain ecosystem. It sounds simple. Write files. But the implications are unlimited.
+
+#### The discovery
+
+Most agent tutorials focus on retrieval. Reading data. Answering questions. Safe, contained operations. But the moment you give an agent the ability to write files, everything changes.
+
+```python
+from langchain.tools import Tool
+
+file_tool = Tool(
+    name="write_file",
+    description="Write content to a file at the specified path",
+    func=write_file_function
+)
+```
+
+This single capability transforms an agent from a reader into a creator.
+
+#### Why file writing matters
+
+An agent that can write files can generate entire codebases, create configuration files, build documentation automatically, modify existing projects, and chain outputs into new inputs.
+
+The agent becomes autonomous. It doesn't just answer questions about code. It writes the code. It doesn't just explain configurations. It creates them.
+
+#### The power loop
+
+Here's what makes this truly powerful. An agent can write a file, then read that file, then modify it based on new context. It creates feedback loops.
+
+```python
+# Agent writes initial structure
+agent.run("Create a basic Express server in server.js")
+
+# Agent reads and extends
+agent.run("Add authentication middleware to server.js")
+
+# Agent refactors based on new requirements
+agent.run("Refactor server.js to use TypeScript")
+```
+
+Each step builds on the last. The agent maintains context across operations. It understands what it created and can evolve it.
+
+#### Unlimited power
+
+The phrase sounds dramatic but it's accurate. With file write access, an agent can bootstrap entire projects from a single prompt, implement features across multiple files, maintain consistency across a codebase, and self-correct by reading its own output.
+
+Traditional development requires constant human intervention. File-writing agents reduce that friction to near zero.
+
+#### The responsibility
+
+This power requires careful consideration. An agent with unrestricted file access can overwrite critical files. It can create malicious code. It can fill disk space.
+
+Sandboxing matters. Permission scoping matters. But within controlled environments, the capability is transformative.
+
+#### What's next
+
+I'm exploring how deep this can go. Can an agent manage its own deployment? Can it write the infrastructure code that runs itself? Can it create other agents?
+
+The file write tool is just the beginning. It's the foundation for truly autonomous systems.
