@@ -49,7 +49,7 @@ export default function Page() {
           <ContentSections />
         </Suspense>
       </section>
-      <div className='max-w-screen-sm md:max-w-2xl mx-auto px-8 flex items-center'>
+      <div className='max-w-screen-sm md:max-w-2xl mx-auto px-8 flex items-center pb-32'>
         <Footer />
       </div>
     </PanelProvider>

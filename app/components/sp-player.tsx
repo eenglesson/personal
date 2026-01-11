@@ -18,14 +18,31 @@ interface NowPlayingData {
 
 const POLL_INTERVAL = 10000;
 
+// Set to true to preview with mock data
+const DEMO_MODE = true;
+
+const MOCK_DATA: NowPlayingData = {
+  isPlaying: false,
+  title: 'Freestyle',
+  artist: 'Westside Gunn',
+  album: 'Peace Fly God',
+  albumImageUrl:
+    'https://i.scdn.co/image/ab67616d0000b8738863bc11d2aa12b54f5aeb36',
+  songUrl: 'https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b',
+  progressMs: 45000,
+  durationMs: 200000,
+};
+
 export default function SpotifyPlayer() {
-  const [data, setData] = useState<NowPlayingData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [progress, setProgress] = useState(0);
+  const [data, setData] = useState<NowPlayingData | null>(
+    DEMO_MODE ? MOCK_DATA : null
+  );
+  const [progress, setProgress] = useState(DEMO_MODE ? 22.5 : 0);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const lastFetchRef = useRef<number>(0);
+  const lastFetchRef = useRef<number>(Date.now());
 
   const fetchNowPlaying = useCallback(async () => {
+    if (DEMO_MODE) return;
     try {
       const res = await fetch('/api/spotify/now-playing');
       if (!res.ok) throw new Error('Failed to fetch');
@@ -38,12 +55,9 @@ export default function SpotifyPlayer() {
       }
     } catch {
       setData(null);
-    } finally {
-      setLoading(false);
     }
   }, []);
 
-  // Smooth progress animation (only when playing)
   useEffect(() => {
     if (progressIntervalRef.current) {
       clearInterval(progressIntervalRef.current);
@@ -69,127 +83,83 @@ export default function SpotifyPlayer() {
   }, [data]);
 
   useEffect(() => {
+    if (DEMO_MODE) return;
     fetchNowPlaying();
     const interval = setInterval(fetchNowPlaying, POLL_INTERVAL);
     return () => clearInterval(interval);
   }, [fetchNowPlaying]);
 
-  if (loading) {
-    return <SpotifyPlayerSkeleton />;
-  }
-
   if (!data?.title) {
-    return <NotPlayingState />;
+    return null;
   }
 
   return (
-    <motion.a
-      href={data.songUrl}
-      target='_blank'
-      rel='noopener noreferrer'
+    <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className='flex items-center gap-3 p-3 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-green-500/50 transition-colors group'
+      className='flex flex-col items-center gap-3'
     >
-      {/* Album Art */}
-      <div className='relative shrink-0'>
-        {data.albumImageUrl ? (
-          <Image
-            src={data.albumImageUrl}
-            alt={data.album || 'Album Art'}
-            width={48}
-            height={48}
-            className='w-12 h-12 rounded shadow-md'
-          />
-        ) : (
-          <div className='w-12 h-12 rounded bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center'>
-            <Music className='w-6 h-6 text-zinc-400' />
-          </div>
-        )}
-        {/* Playing indicator */}
-        {data.isPlaying && (
-          <div className='absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1'>
-            <EqualizerBars />
-          </div>
-        )}
-      </div>
+      {/* Status text above */}
+      <p className='text-[13px] text-gray-500'>
+        {data.isPlaying ? 'Now playing...' : 'Last listened to...'}
+      </p>
 
-      {/* Track Info */}
-      <div className='flex-1 min-w-0'>
-        <p className='text-xs text-zinc-500 dark:text-zinc-400 mb-0.5'>
-          {data.isPlaying ? 'Now playing' : 'Last listened to'}
-        </p>
-        <p className='text-sm font-medium truncate text-zinc-900 dark:text-zinc-100 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors'>
-          {data.title}
-        </p>
-        <p className='text-xs text-zinc-500 dark:text-zinc-400 truncate'>
-          {data.artist}
-        </p>
-
-        {/* Progress Bar - only show when playing */}
-        {data.isPlaying && data.durationMs && (
-          <div className='mt-1.5 h-1 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden'>
-            <motion.div
-              className='h-full bg-green-500'
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.5, ease: 'linear' }}
+      {/* Card */}
+      <motion.a
+        href={data.songUrl}
+        target='_blank'
+        rel='noopener noreferrer'
+        className='flex items-center gap-3 px-3 w-[338px] h-[72px] rounded-2xl bg-white dark:bg-gray-500/10 border border-transparent dark:border-zinc-700/50 shadow-[0_2px_12px_rgba(0,0,0,0.06)] dark:shadow-none transition-colors group'
+        whileHover={{ scale: 1.02 }}
+        transition={{
+          scale: {
+            type: 'spring',
+            stiffness: 180,
+            damping: 10,
+          },
+        }}
+      >
+        {/* Album Art */}
+        <div className='relative shrink-0'>
+          {data.albumImageUrl ? (
+            <Image
+              src={data.albumImageUrl}
+              alt={data.album || 'Album Art'}
+              width={52}
+              height={52}
+              className='w-[52px] h-[52px] rounded-lg shadow-[0_1px_6px_rgba(0,0,0,0.05)]'
             />
+          ) : (
+            <div className='w-[52px] h-[52px] rounded-lg bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center'>
+              <Music className='w-6 h-6 text-zinc-400' />
+            </div>
+          )}
+        </div>
+
+        {/* Track Info */}
+        <div className='flex-1 min-w-0'>
+          <div className='flex flex-col -space-y-0.5'>
+            <p className='text-[14px] font-medium truncate'>{data.title}</p>
+            <p className='text-[13px] text-gray-500 truncate'>{data.artist}</p>
           </div>
-        )}
-      </div>
 
-      {/* Spotify Icon */}
-      <SpotifyIcon className='w-5 h-5 text-green-500 shrink-0' />
-    </motion.a>
-  );
-}
+          {/* Progress Bar - only show when playing */}
+          {data.isPlaying && data.durationMs && (
+            <div className='mt-1.5 h-1 bg-zinc-200 dark:bg-zinc-600 rounded-full overflow-hidden'>
+              <motion.div
+                className='h-full bg-green-500'
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.5, ease: 'linear' }}
+              />
+            </div>
+          )}
+        </div>
 
-function EqualizerBars() {
-  return (
-    <div className='flex items-end gap-[2px] h-2.5 w-2.5'>
-      {[0, 1, 2].map((i) => (
-        <motion.div
-          key={i}
-          className='w-[2px] bg-white rounded-full'
-          animate={{ height: ['40%', '100%', '60%', '100%', '40%'] }}
-          transition={{
-            duration: 1,
-            repeat: Infinity,
-            delay: i * 0.15,
-            ease: 'easeInOut',
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-function SpotifyPlayerSkeleton() {
-  return (
-    <div className='flex items-center gap-3 p-3 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 animate-pulse'>
-      <div className='w-12 h-12 rounded bg-zinc-200 dark:bg-zinc-800' />
-      <div className='flex-1 space-y-2'>
-        <div className='h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-16' />
-        <div className='h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-3/4' />
-        <div className='h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-1/2' />
-      </div>
-      <div className='w-5 h-5 bg-zinc-200 dark:bg-zinc-800 rounded-full' />
-    </div>
-  );
-}
-
-function NotPlayingState() {
-  return (
-    <div className='flex items-center gap-3 p-3 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800'>
-      <div className='w-12 h-12 rounded bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center'>
-        <Music className='w-6 h-6 text-zinc-400' />
-      </div>
-      <div className='flex-1'>
-        <p className='text-sm text-zinc-500 dark:text-zinc-400'>Not playing</p>
-      </div>
-      <SpotifyIcon className='w-5 h-5 text-zinc-400 shrink-0' />
-    </div>
+        {/* Spotify Icon */}
+        <SpotifyIcon className='w-5 h-5 text-gray-400/80 dark:text-gray-500/50 shrink-0' />
+      </motion.a>
+    </motion.div>
   );
 }
 
